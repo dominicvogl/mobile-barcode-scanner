@@ -47,9 +47,19 @@ export default function BarcodeScanner() {
 		};
 	}, [isScanning, selectedDeviceId]);
 
-	const handleDetected = useCallback((results) => {
-		if (!Array.isArray(results)) return;
-		// results is an array of { rawValue, ... }
+	const handleDetected = useCallback((input) => {
+		// Normalize different possible shapes from the library:
+		// - string (from onDecode)
+		// - single result object with rawValue (from onResult)
+		// - array of result objects
+		const results = Array.isArray(input)
+			? input
+			: typeof input === "string"
+			? [{ rawValue: input }]
+			: input && typeof input === "object" && "rawValue" in input
+			? [input]
+			: [];
+
 		for (const r of results) {
 			const raw = String(r?.rawValue ?? "").trim();
 			if (!raw) continue;
