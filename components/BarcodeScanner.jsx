@@ -3,13 +3,6 @@
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 
-// Utility to decide if a string looks like an EAN-13 barcode
-function isLikelyEAN13(value) {
-	// EAN-13 is 13 digits; some scanners may include whitespace
-	const v = String(value).trim();
-	return /^\d{13}$/.test(v);
-}
-
 export default function BarcodeScanner() {
 	const [selectedDeviceId, setSelectedDeviceId] = useState("");
 	const [devices, setDevices] = useState([]);
@@ -17,8 +10,8 @@ export default function BarcodeScanner() {
 	const [isScanning, setIsScanning] = useState(false);
 	const [codes, setCodes] = useState([]);
 	const [message, setMessage] = useState("");
-	const lastDetectedRef = useRef("");
-	const seenRef = useRef(new Set());
+	// Cooldown map to avoid flooding while still allowing repeated scans of the same code
+	const lastTimesRef = useRef(new Map()); // code -> timestamp
 
 	const textAreaValue = useMemo(() => codes.join("\n"), [codes]);
 
@@ -63,37 +56,50 @@ export default function BarcodeScanner() {
 		for (const r of results) {
 			const raw = String(r?.rawValue ?? "").trim();
 			if (!raw) continue;
-			// filter for EAN-13 by default, but accept any if user wants that later
-			if (!isLikelyEAN13(raw)) continue;
-			// throttle duplicates seen in a row or already seen
-			if (raw === lastDetectedRef.current) continue;
-			if (seenRef.current.has(raw)) {
-				lastDetectedRef.current = raw; // avoid loop on the same code
-				continue;
-			}
-			setCodes((prev) => {
-				if (prev.includes(raw)) return prev;
-				return [...prev, raw];
-			});
-			seenRef.current.add(raw);
-			lastDetectedRef.current = raw;
+
+			// Allow any non-empty value (support EAN-8/13, UPC, Code128, QR, etc.)
+			// But avoid flooding: only accept the same code again after a short cooldown
+			const now = Date.now();
+			const last = lastTimesRef.current.get(raw) || 0;
+			if (now - last < 800) continue; // 800ms cooldown per unique code
+
+			setCodes((prev) => [...prev, raw]);
+			lastTimesRef.current.set(raw, now);
 			setMessage(`Erkannt: ${raw}`);
 		}
 	}, []);
 
 	const handleCopy = useCallback(async () => {
+		const text = textAreaValue;
 		try {
-			await navigator.clipboard.writeText(textAreaValue);
+			if (navigator?.clipboard?.writeText) {
+				await navigator.clipboard.writeText(text);
+			} else {
+				throw new Error("Clipboard API not available");
+			}
 			setMessage("In die Zwischenablage kopiert.");
 		} catch (e) {
-			setMessage("Kopieren fehlgeschlagen. Bitte manuell kopieren.");
+			// Fallback for browsers without Clipboard API (creates a temporary textarea)
+			try {
+				const ta = document.createElement("textarea");
+				ta.value = text;
+				ta.setAttribute("readonly", "");
+				ta.style.position = "absolute";
+				ta.style.left = "-9999px";
+				document.body.appendChild(ta);
+				ta.select();
+				document.execCommand("copy");
+				document.body.removeChild(ta);
+				setMessage("In die Zwischenablage kopiert.");
+			} catch (err) {
+				setMessage("Kopieren fehlgeschlagen. Bitte manuell kopieren.");
+			}
 		}
 	}, [textAreaValue]);
 
 	const handleReset = useCallback(() => {
 		setCodes([]);
-		seenRef.current = new Set();
-		lastDetectedRef.current = "";
+		lastTimesRef.current = new Map();
 		setMessage("Zurückgesetzt.");
 	}, []);
 
@@ -151,16 +157,16 @@ export default function BarcodeScanner() {
 			<div className="w-full aspect-[3/2] relative overflow-hidden rounded-box border border-base-300">
 				{isScanning ? (
 					<div className="w-full h-full">
-      <Scanner
-       						deviceId={selectedDeviceId || undefined}
-       						torch={torch}
-       						formats={["ean_13", "ean_8", "upc_a", "upc_e", "code_128"]}
+	      <Scanner
+	       					deviceId={selectedDeviceId || undefined}
+	       					torch={torch}
+	       					formats={["ean_13", "ean_8", "upc_a", "upc_e", "code_128"]}
 							constraints={{
 								facingMode: { ideal: "environment" },
 								width: { ideal: 1280 },
 								height: { ideal: 720 },
 							}}
-       onDecode={(value) => handleDetected([{ rawValue: value }])}
+	       onDecode={handleDetected}
 								onResult={(results) => handleDetected(results || [])}
 								onError={(err) => setMessage(err?.message || "Kamera-Fehler")}
 							scanDelay={200}
