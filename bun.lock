@@ -5,6 +5,7 @@
       "name": "mobile-barcode-scanner",
       "dependencies": {
         "@yudiel/react-qr-scanner": "^2.3.1",
+        "daisyui": "^5.0.54",
         "next": "15.5.2",
         "react": "19.1.0",
         "react-dom": "19.1.0",
@@ -318,6 +319,8 @@
     "concat-map": ["concat-map@0.0.1", "", {}, "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="],
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
+
+    "daisyui": ["daisyui@5.0.54", "", {}, "sha512-03iuq06+lLq/VczY/+YpADgLXVC1HYO63PNiH6A9hn/+f6IkVoONVc+Jh08xizkLQQCVVMMUBp+KeIdcWSBLcg=="],
 
     "damerau-levenshtein": ["damerau-levenshtein@1.0.8", "", {}, "sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA=="],
 
