@@ -53,7 +53,7 @@ export default function BarcodeScanner() {
 						onScan={handleOnScan}
 						onError={handleOnError}
 						formats={["ean_13"]}
-						allowMultiple={true}
+						allowMultiple={false}
 						styles={scannerStyles}
 						scanDelay={500}
 						components={{
