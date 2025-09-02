@@ -23,6 +23,9 @@ const inter = localFont({
 export const metadata = {
   title: "EAN Code Scanner",
   description: "Scan your barcodes and ean codes",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
