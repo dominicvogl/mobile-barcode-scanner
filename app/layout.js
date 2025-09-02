@@ -23,12 +23,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-		  <div className="min-h-screen p-6 sm:p-10">
-			  <main className="mx-auto max-w-3xl">
-				  {children}
-			  </main>
-			  <Footer />
-		  </div>
+		  <main className="min-h-screen p-6 sm:p-10 mx-auto max-w-3xl">
+			  {children}
+		  </main>
+		  <Footer />
       </body>
     </html>
   );
