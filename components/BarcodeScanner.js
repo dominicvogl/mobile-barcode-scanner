@@ -1,6 +1,6 @@
 'use client';
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TextOutput from "@/components/TextOutput";
 import ButtonCopyToClipboard from "@/components/ButtonCopyToClipboard";
 import ButtonStartScanner from "@/components/ButtonStartScanner";
@@ -10,7 +10,6 @@ export default function BarcodeScanner() {
 	const [eanList, setEanList] = useState([]);
 	const [isScanning, setIsScanning] = useState(false);
 
-
 	const handleOnScan = (result) => {
 		setEanList(prev => [...prev, result[0].rawValue]);
 	}
@@ -18,7 +17,6 @@ export default function BarcodeScanner() {
 	const handleOnError = (err) => {
 		console.error(err);
 	}
-
 
 	// 16:10 Aspect Ratio Styles für den Scanner
 	const scannerStyles = {

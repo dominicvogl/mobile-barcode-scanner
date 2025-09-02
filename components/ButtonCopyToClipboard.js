@@ -41,7 +41,7 @@ export default function ButtonCopyToClipboard({eanList}) {
 			case 'error':
 				return 'btn btn-error';
 			default:
-				return 'btn btn-secondary';
+				return 'btn btn-primary';
 		}
 	};
 
