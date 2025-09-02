@@ -17,7 +17,7 @@ export default function FeatureGrid () {
 	]
 
 	return (
-		<ul className={"grid grid-cols-3 gap-6 my-6"}>
+		<ul className={"md:grid md:grid-cols-3 space-y-6 gap-6 my-6"}>
 			{FeatureGrid && FeatureGrid.map((feature, i) => (
 				<li key={i}>
 					<h3 className={"text-primary font-bold mb-2"}>{feature.title}</h3>
