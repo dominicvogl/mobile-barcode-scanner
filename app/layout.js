@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de" data-theme={"pastel"}>
       <body className={`${inter.variable} antialiased`}>
-        <main className="min-h-screen p-6 sm:p-10 mx-auto max-w-3xl">
+        <main className="p-6 sm:p-10 mx-auto max-w-4xl">
           {children}
         </main>
         <Footer />
