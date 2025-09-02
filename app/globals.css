@@ -1,4 +1,20 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-	themes: light --default, dark --prefersdark, sunset;
+  themes: light --default, dark --prefersdark, sunset;
+}
+
+/* Use the local Inter font via CSS variable from next/font/local */
+:root {
+  --font-inter: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+html, body {
+  font-family: var(--font-inter);
+}
+
+
+/* Ensure our local font is actually used even if :root var fails */
+html, body {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }

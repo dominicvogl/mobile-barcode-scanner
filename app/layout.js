@@ -1,15 +1,23 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "@/components/TemplateParts/Footer";
 
-const geistSans = Geist({
+// Load local Inter fonts (regular 400 and semibold 600)
+const inter = localFont({
+  src: [
+    {
+      path: "../public/fonts/inter/inter-v19-latin-regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/inter/inter-v19-latin-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+  ],
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-inter",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -19,14 +27,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme={"pastel"}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-		  <main className="min-h-screen p-6 sm:p-10 mx-auto max-w-3xl">
-			  {children}
-		  </main>
-		  <Footer />
+    <html lang="de" data-theme={"pastel"}>
+      <body className={`${inter.variable} antialiased`}>
+        <main className="min-h-screen p-6 sm:p-10 mx-auto max-w-3xl">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
