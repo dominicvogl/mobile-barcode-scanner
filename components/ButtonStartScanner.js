@@ -1,13 +1,34 @@
+'use client'
+
 export default function ButtonStartScanner({isScanning, setIsScanning}) {
 
+	const scrollToScanner = () => {
+		if (typeof window === 'undefined') return;
+		const el = document.getElementById('scanner-section');
+		if (!el) return;
+		// Use rAF to ensure layout is updated after state change and element is visible
+		requestAnimationFrame(() => {
+			el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
+	};
+
 	const toggleScanner = () => {
-		setIsScanning(prev => !prev);
+		setIsScanning(prev => {
+			const next = !prev;
+			if (!prev && next) {
+				// Scanning was off and is being turned on, scroll to scanner
+				scrollToScanner();
+			}
+			return next;
+		});
 	}
 
 	return (
 		<button
 			className={`btn ${isScanning ? 'btn-error' : 'btn-primary'}`}
 			onClick={toggleScanner}
+			aria-pressed={isScanning}
+			aria-label={isScanning ? 'Scanner stoppen' : 'Scanner starten'}
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
 				<path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />

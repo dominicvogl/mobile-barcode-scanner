@@ -44,7 +44,7 @@ export default function BarcodeScanner() {
 			</div>
 
 			<div className={"md:flex gap-6"}>
-				<div className={"md:w-1/2"}>
+				<div className={"md:w-1/2"} id="scanner-section">
 
 				<p className={"text-sm font-bold my-2"}>Scanner</p>
 
