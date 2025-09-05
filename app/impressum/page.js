@@ -1,5 +1,6 @@
 import HeadingOne from "@/components/headlines/h1";
 import HeadingTwo from "@/components/headlines/h2";
+import FooterNavi from "@/components/TemplateParts/FooterNavi";
 
 export const metadata = {
 	title: "Impressum - EAN Code Scanner",
@@ -9,6 +10,11 @@ export const metadata = {
 export default function Impressum() {
 	return (
 		<>
+
+			<nav>
+				<FooterNavi />
+			</nav>
+
 			<HeadingOne>Impressum</HeadingOne>
 
 			<p>Dominic Vogl<br />
