@@ -1,18 +1,47 @@
 'use client';
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import TextOutput from "@/components/TextOutput";
 import ButtonCopyToClipboard from "@/components/ButtonCopyToClipboard";
 import ButtonStartScanner from "@/components/ButtonStartScanner";
+
+// Cooldown in Millisekunden - wie lange nach einem Scan derselbe Code ignoriert wird
+const SCAN_COOLDOWN_MS = 2000;
 
 export default function BarcodeScanner() {
 
 	const [eanList, setEanList] = useState([]);
 	const [isScanning, setIsScanning] = useState(false);
 
-	const handleOnScan = (result) => {
-		setEanList(prev => [...prev, result[0].rawValue]);
-	}
+	// Refs für Duplikat-Prüfung (Refs statt State, um Re-Renders zu vermeiden)
+	const lastScannedCodeRef = useRef(null);
+	const lastScannedTimeRef = useRef(0);
+
+	const handleOnScan = useCallback((result) => {
+		const scannedValue = result[0].rawValue;
+		const now = Date.now();
+
+		// Prüfe ob es derselbe Code ist UND ob die Cooldown-Zeit noch nicht abgelaufen ist
+		// (verhindert mehrfaches Scannen durch den Library-Bug)
+		const isSameCode = scannedValue === lastScannedCodeRef.current;
+		const isCooldownActive = (now - lastScannedTimeRef.current) < SCAN_COOLDOWN_MS;
+
+		if (isSameCode && isCooldownActive) {
+			return;
+		}
+
+		// Aktualisiere Refs für Cooldown-Tracking
+		lastScannedCodeRef.current = scannedValue;
+		lastScannedTimeRef.current = now;
+
+		// Füge nur hinzu, wenn der Code noch nicht in der Liste ist
+		setEanList(prev => {
+			if (prev.includes(scannedValue)) {
+				return prev; // Keine Änderung - Duplikat
+			}
+			return [...prev, scannedValue];
+		});
+	}, []);
 
 	const handleOnError = (err) => {
 		console.error(err);
@@ -54,7 +83,7 @@ export default function BarcodeScanner() {
 							formats={["ean_13"]}
 							allowMultiple={false}
 							styles={scannerStyles}
-							scanDelay={500}
+							scanDelay={1000}
 							components={{
 								finder: false
 							}}
