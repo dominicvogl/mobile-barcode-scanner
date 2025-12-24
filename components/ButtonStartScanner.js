@@ -49,21 +49,6 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 		});
 	}
 
-	const getPermissionMessage = () => {
-		if (!permissionChecked) return null
-
-		switch (cameraPermission) {
-			case 'granted':
-				return {status: "success", message: "✓ Kameraberechtigung erteilt"}
-			case 'denied':
-				return {status: "error", message: "✗ Kameraberechtigung verweigert."}
-			case 'prompt':
-				return {status: "warning", message: "⚠ Gewähre bitte Kamerazugriff"}
-			default:
-				return null
-		}
-	}
-
 	return (
 		<div>
 
@@ -81,10 +66,6 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 
 				{isScanning ? 'Scanner stoppen' : 'Scanner starten'}
 			</button>
-
-			{cameraPermission !== 'granted' && (
-				<Alert alert={getPermissionMessage()} />
-			)}
 		</div>
 	)
 }
