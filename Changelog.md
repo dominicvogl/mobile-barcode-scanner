@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.7
+- Enhanced user interface with rounded corners for better visual consistency
+- Improved spacing and layout adjustments
+- Typography updates for better readability
+
 ## 0.0.6
 - Updated localization to German
 - Added placeholder for textarea

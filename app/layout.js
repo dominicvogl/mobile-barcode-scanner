@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de" data-theme={"pastel"}>
       <body className={`${inter.variable} antialiased`}>
-        <main className="p-6 sm:p-10 mx-auto max-w-4xl">
+        <main className="p-6 sm:p-10 mx-auto max-w-5xl">
           {children}
         </main>
         <Footer />

@@ -63,7 +63,7 @@ export default function BarcodeScanner() {
 
 	return (
 		<section className="my-6">
-			<div className={"bg-primary/10 py-8 my-12"}>
+			<div className={"bg-primary/10 py-8 my-12 rounded-lg"}>
 				<div className="flex flex-wrap justify-center gap-4">
 					<ButtonStartScanner isScanning={isScanning} setIsScanning={setIsScanning} />
 					<ButtonCopyToClipboard eanList={eanList} />
