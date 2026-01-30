@@ -53,7 +53,7 @@ export default function ButtonCopyToClipboard({eanList}) {
 			case 'error':
 				return errorMessage;
 			default:
-				return 'Copy EANs to Clipboard';
+				return 'Kopiere Codes in die Zwischenablage';
 		}
 	};
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.6
+- Updated localization to German
+- Added placeholder for textarea
+- Upgraded dependencies
+
 ## 0.0.5
 - removed camera access permission message
 - try to fix the issue / problem that the library sometimes scans the same code multiple times, seems to be a bug
