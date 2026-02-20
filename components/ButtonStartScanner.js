@@ -1,16 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Alert from "@/components/Alert";
+import { useState } from 'react'
 
-export default function ButtonStartScanner({isScanning, setIsScanning}) {
+export default function ButtonStartScanner({isScanning, setIsScanning, onCameraInitError, onCameraInitSuccess}) {
 
-	const [cameraPermission, setCameraPermission] = useState(null)
-	const [permissionChecked, setPermissionChecked] = useState(false)
-
-	useEffect(() => {
-		checkCameraPermission()
-	}, [])
+	const [isRequestingCamera, setIsRequestingCamera] = useState(false)
 
 	const scrollToScanner = () => {
 		if (typeof window === 'undefined') return;
@@ -22,31 +16,47 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 		});
 	};
 
-	const checkCameraPermission = async () => {
-		try {
-			const permission = await navigator.permissions.query({ name: 'camera' })
-			setCameraPermission(permission.state)
-			setPermissionChecked(true)
-
-			// Listener für Änderungen der Berechtigung
-			permission.addEventListener('change', () => {
-				setCameraPermission(permission.state)
-			})
-		} catch (error) {
-			console.error('Fehler beim Prüfen der Kameraberechtigung:', error)
-			setPermissionChecked(true)
+	const ensureCameraAccess = async () => {
+		if (!window.isSecureContext) {
+			throw new Error('camera access is only permitted in secure context. Use HTTPS or localhost rather than HTTP.')
 		}
+
+		if (!navigator?.mediaDevices?.getUserMedia) {
+			throw new Error('this browser has no Stream API support')
+		}
+
+		const stream = await navigator.mediaDevices.getUserMedia({
+			audio: false,
+			video: {
+				facingMode: { ideal: 'environment' }
+			}
+		})
+
+		// Permission wurde erteilt - Teststream direkt wieder schließen.
+		stream.getTracks().forEach((track) => track.stop())
 	}
 
-	const toggleScanner = () => {
-		setIsScanning(prev => {
-			const next = !prev;
-			if (!prev && next) {
-				// Scanning was off and is being turned on, scroll to scanner
-				scrollToScanner();
-			}
-			return next;
-		});
+	const toggleScanner = async () => {
+		if (isRequestingCamera) return
+
+		if (isScanning) {
+			setIsScanning(false)
+			return
+		}
+
+		setIsRequestingCamera(true)
+
+		try {
+			await ensureCameraAccess()
+			onCameraInitSuccess?.()
+			setIsScanning(true)
+			scrollToScanner()
+		} catch (error) {
+			console.error('Fehler beim Starten der Kamera:', error)
+			onCameraInitError?.(error)
+		} finally {
+			setIsRequestingCamera(false)
+		}
 	}
 
 	return (
@@ -55,6 +65,7 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 			<button
 				className={`btn ${isScanning ? 'btn-error' : 'btn-primary'}`}
 				onClick={toggleScanner}
+				disabled={isRequestingCamera}
 				aria-pressed={isScanning}
 				aria-label={isScanning ? 'Scanner stoppen' : 'Scanner starten'}
 			>
@@ -64,7 +75,7 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 						  clipRule="evenodd"/>
 				</svg>
 
-				{isScanning ? 'Scanner stoppen' : 'Scanner starten'}
+				{isRequestingCamera ? 'Kamera wird gestartet...' : (isScanning ? 'Scanner stoppen' : 'Scanner starten')}
 			</button>
 		</div>
 	)

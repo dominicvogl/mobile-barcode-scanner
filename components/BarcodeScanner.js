@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import TextOutput from "@/components/TextOutput";
 import ButtonCopyToClipboard from "@/components/ButtonCopyToClipboard";
 import ButtonStartScanner from "@/components/ButtonStartScanner";
+import Alert from "@/components/Alert";
 
 // Cooldown in Millisekunden - wie lange nach einem Scan derselbe Code ignoriert wird
 const SCAN_COOLDOWN_MS = 2000;
@@ -12,6 +13,7 @@ export default function BarcodeScanner() {
 
 	const [eanList, setEanList] = useState([]);
 	const [isScanning, setIsScanning] = useState(false);
+	const [scannerError, setScannerError] = useState(null);
 
 	// Refs für Duplikat-Prüfung (Refs statt State, um Re-Renders zu vermeiden)
 	const lastScannedCodeRef = useRef(null);
@@ -43,8 +45,47 @@ export default function BarcodeScanner() {
 		});
 	}, []);
 
+	const getCameraErrorMessage = (error) => {
+		const name = error?.name ?? '';
+		const message = String(error?.message ?? '').toLowerCase();
+
+		if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+			return 'Kein Kamerazugriff erlaubt. In Safari: aA > Website-Einstellungen > Kamera auf "Erlauben" stellen.'
+		}
+
+		if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+			return 'Keine Kamera gefunden.'
+		}
+
+		if (name === 'NotReadableError' || name === 'TrackStartError') {
+			return 'Die Kamera wird bereits von einer anderen App oder einem anderen Tab verwendet.'
+		}
+
+		if (message.includes('secure context') || message.includes('https')) {
+			return 'Kamera funktioniert nur über HTTPS oder auf localhost. Auf dem iPhone im lokalen Netzwerk daher bitte HTTPS nutzen.'
+		}
+
+		if (message.includes('stream api support')) {
+			return 'Dieser Browser unterstützt den Kamera-Zugriff nicht.'
+		}
+
+		return error?.message || 'Kamera konnte nicht gestartet werden.'
+	}
+
+	const setCameraError = useCallback((error) => {
+		setScannerError({
+			status: 'error',
+			message: getCameraErrorMessage(error)
+		});
+	}, []);
+
+	const clearCameraError = useCallback(() => {
+		setScannerError(null);
+	}, []);
+
 	const handleOnError = (err) => {
 		console.error(err);
+		setCameraError(err);
 	}
 
 	// 16:10 Aspect Ratio Styles für den Scanner
@@ -65,9 +106,19 @@ export default function BarcodeScanner() {
 		<section className="my-6">
 			<div className={"bg-primary/10 py-8 my-12 rounded-lg"}>
 				<div className="flex flex-wrap justify-center gap-4">
-					<ButtonStartScanner isScanning={isScanning} setIsScanning={setIsScanning} />
+					<ButtonStartScanner
+						isScanning={isScanning}
+						setIsScanning={setIsScanning}
+						onCameraInitError={setCameraError}
+						onCameraInitSuccess={clearCameraError}
+					/>
 					<ButtonCopyToClipboard eanList={eanList} />
 				</div>
+				{scannerError ? (
+					<div className="mt-4">
+						<Alert alert={scannerError} />
+					</div>
+				) : null}
 			</div>
 
 			<div className={"md:flex gap-6"}>
