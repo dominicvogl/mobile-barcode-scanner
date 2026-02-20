@@ -8,6 +8,7 @@ import Alert from "@/components/Alert";
 
 // Cooldown in Millisekunden - wie lange nach einem Scan derselbe Code ignoriert wird
 const SCAN_COOLDOWN_MS = 2000;
+const EAN_13_REGEX = /^\d{13}$/;
 
 export default function BarcodeScanner() {
 
@@ -20,12 +21,21 @@ export default function BarcodeScanner() {
 	const lastScannedTimeRef = useRef(0);
 
 	const handleOnScan = useCallback((result) => {
-		const scannedValue = result[0].rawValue;
+		const scannedValue = Array.isArray(result) ? result[0]?.rawValue : result?.rawValue;
+		if (typeof scannedValue !== "string") {
+			return;
+		}
+
+		const normalizedScannedValue = scannedValue.trim();
+		if (!EAN_13_REGEX.test(normalizedScannedValue)) {
+			return;
+		}
+
 		const now = Date.now();
 
 		// Prüfe ob es derselbe Code ist UND ob die Cooldown-Zeit noch nicht abgelaufen ist
 		// (verhindert mehrfaches Scannen durch den Library-Bug)
-		const isSameCode = scannedValue === lastScannedCodeRef.current;
+		const isSameCode = normalizedScannedValue === lastScannedCodeRef.current;
 		const isCooldownActive = (now - lastScannedTimeRef.current) < SCAN_COOLDOWN_MS;
 
 		if (isSameCode && isCooldownActive) {
@@ -33,15 +43,15 @@ export default function BarcodeScanner() {
 		}
 
 		// Aktualisiere Refs für Cooldown-Tracking
-		lastScannedCodeRef.current = scannedValue;
+		lastScannedCodeRef.current = normalizedScannedValue;
 		lastScannedTimeRef.current = now;
 
 		// Füge nur hinzu, wenn der Code noch nicht in der Liste ist
 		setEanList(prev => {
-			if (prev.includes(scannedValue)) {
+			if (prev.includes(normalizedScannedValue)) {
 				return prev; // Keine Änderung - Duplikat
 			}
-			return [...prev, scannedValue];
+			return [...prev, normalizedScannedValue];
 		});
 	}, []);
 
