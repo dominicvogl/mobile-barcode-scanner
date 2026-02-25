@@ -1,6 +1,6 @@
 {
   "name": "mobile-barcode-scanner",
-  "version": "0.0.7",
+  "version": "0.0.12",
   "private": true,
   "scripts": {
     "dev": "next dev",
