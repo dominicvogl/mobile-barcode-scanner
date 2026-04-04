@@ -1,7 +1,5 @@
-import pkg from "../package.json";
-
 export default function VersionBadge() {
 	return (
-		<span className={"badge badge-soft badge-primary badge-sm"}>Version {pkg.version}</span>
+		<span className={"badge badge-soft badge-primary badge-sm"}>Version {process.env.APP_VERSION || "unbekannt"}</span>
 	)
 }

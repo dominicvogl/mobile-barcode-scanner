@@ -1,9 +1,11 @@
 'use client';
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import Alert from "@/components/Alert";
 import TextOutput from "@/components/TextOutput";
 import ButtonCopyToClipboard from "@/components/ButtonCopyToClipboard";
 import ButtonStartScanner from "@/components/ButtonStartScanner";
+import { ensureLocalZxingReader } from "@/lib/zxing-local-reader";
 
 // Cooldown in Millisekunden - wie lange nach einem Scan derselbe Code ignoriert wird
 const SCAN_COOLDOWN_MS = 2000;
@@ -12,10 +14,71 @@ export default function BarcodeScanner() {
 
 	const [eanList, setEanList] = useState([]);
 	const [isScanning, setIsScanning] = useState(false);
+	const [decoderStatus, setDecoderStatus] = useState('idle'); // 'idle', 'loading', 'ready', 'error'
 
 	// Refs für Duplikat-Prüfung (Refs statt State, um Re-Renders zu vermeiden)
 	const lastScannedCodeRef = useRef(null);
 	const lastScannedTimeRef = useRef(0);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		const initializeDecoder = async () => {
+			setDecoderStatus('loading');
+
+			try {
+				await ensureLocalZxingReader();
+
+				if (isMounted) {
+					setDecoderStatus('ready');
+				}
+			} catch (error) {
+				console.error('Local ZXing decoder initialization failed', error);
+
+				if (isMounted) {
+					setDecoderStatus('error');
+				}
+			}
+		};
+
+		initializeDecoder();
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (!isScanning || decoderStatus !== 'error') {
+			return;
+		}
+
+		let isMounted = true;
+
+		const retryDecoderInitialization = async () => {
+			setDecoderStatus('loading');
+
+			try {
+				await ensureLocalZxingReader();
+
+				if (isMounted) {
+					setDecoderStatus('ready');
+				}
+			} catch (error) {
+				console.error('Local ZXing decoder retry failed', error);
+
+				if (isMounted) {
+					setDecoderStatus('error');
+				}
+			}
+		};
+
+		retryDecoderInitialization();
+
+		return () => {
+			isMounted = false;
+		};
+	}, [decoderStatus, isScanning]);
 
 	const handleOnScan = useCallback((result) => {
 		const scannedValue = result[0].rawValue;
@@ -47,6 +110,10 @@ export default function BarcodeScanner() {
 		console.error(err);
 	}
 
+	const shouldShowScanner = isScanning && decoderStatus === 'ready';
+	const shouldShowLoadingState = isScanning && (decoderStatus === 'idle' || decoderStatus === 'loading');
+	const shouldShowErrorState = isScanning && decoderStatus === 'error';
+
 	// 16:10 Aspect Ratio Styles für den Scanner
 	const scannerStyles = {
 		container: {
@@ -75,7 +142,7 @@ export default function BarcodeScanner() {
 
 				<p className={"text-sm font-bold my-2"}>Scanner</p>
 
-				{isScanning ? (
+				{shouldShowScanner ? (
 					<div className={"my-6 lg:my-0 relative"}>
 						<Scanner
 							onScan={handleOnScan}
@@ -99,6 +166,20 @@ export default function BarcodeScanner() {
 							</div>
 						</div>
 
+					</div>
+				) : shouldShowLoadingState ? (
+					<div className="w-full aspect-16/8 bg-gray-200 rounded-lg flex items-center justify-center my-6 lg:my-0">
+						<div className="text-center text-gray-500">
+							<p className="text-lg font-semibold">Scanner wird vorbereitet</p>
+							<p className="text-sm">Der lokale Barcode-Decoder wird geladen.</p>
+						</div>
+					</div>
+				) : shouldShowErrorState ? (
+					<div className="my-6 lg:my-0">
+						<Alert alert={{
+							status: 'error',
+							message: 'Scanner konnte lokal nicht initialisiert werden. Bitte Seite neu laden.',
+						}} />
 					</div>
 				) : (
 					<div className="w-full aspect-16/8 bg-gray-200 rounded-lg flex items-center justify-center my-6 lg:my-0">

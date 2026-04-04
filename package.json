@@ -1,8 +1,12 @@
 {
   "name": "mobile-barcode-scanner",
-  "version": "0.0.12",
+  "version": "0.0.14-beta",
   "private": true,
   "scripts": {
+    "copy:zxing-wasm": "node scripts/copy-zxing-reader-wasm.mjs",
+    "predev": "node scripts/copy-zxing-reader-wasm.mjs",
+    "postinstall": "node scripts/copy-zxing-reader-wasm.mjs",
+    "prebuild": "node scripts/copy-zxing-reader-wasm.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,10 +14,12 @@
   },
   "dependencies": {
     "@yudiel/react-qr-scanner": "2.4.1",
+    "barcode-detector": "3.0.6",
     "daisyui": "^5.5.19",
     "next": "^16.2.2",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "zxing-wasm": "2.2.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",

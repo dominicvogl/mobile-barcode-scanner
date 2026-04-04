@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
+const COPY_ERROR_MESSAGE = 'Kopieren fehlgeschlagen. Bitte Browser-Berechtigung pruefen.';
+
 export default function ButtonCopyToClipboard({eanList}) {
 	const [status, setStatus] = useState('idle'); // 'idle', 'success', 'error'
-	const [errorMessage, setErrorMessage] = useState('');
 
 	const handleCopyToClipboard = async () => {
 		try {
@@ -23,12 +24,11 @@ export default function ButtonCopyToClipboard({eanList}) {
 		} catch (error) {
 			// Fehler behandeln
 			setStatus('error');
-			setErrorMessage(error.message || 'Kopieren fehlgeschlagen');
+			console.error('Clipboard copy failed', error);
 
 			// Nach 3 Sekunden zurück zum ursprünglichen Zustand
 			setTimeout(() => {
 				setStatus('idle');
-				setErrorMessage('');
 			}, 3000);
 		}
 	};
@@ -51,7 +51,7 @@ export default function ButtonCopyToClipboard({eanList}) {
 			case 'success':
 				return 'Erfolgreich kopiert!';
 			case 'error':
-				return errorMessage;
+				return COPY_ERROR_MESSAGE;
 			default:
 				return 'Kopiere Codes in die Zwischenablage';
 		}

@@ -1,16 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Alert from "@/components/Alert";
+import { useEffect } from 'react'
 
 export default function ButtonStartScanner({isScanning, setIsScanning}) {
-
-	const [cameraPermission, setCameraPermission] = useState(null)
-	const [permissionChecked, setPermissionChecked] = useState(false)
-
-	useEffect(() => {
-		checkCameraPermission()
-	}, [])
 
 	const scrollToScanner = () => {
 		if (typeof window === 'undefined') return;
@@ -22,21 +14,17 @@ export default function ButtonStartScanner({isScanning, setIsScanning}) {
 		});
 	};
 
-	const checkCameraPermission = async () => {
+	async function checkCameraPermission() {
 		try {
-			const permission = await navigator.permissions.query({ name: 'camera' })
-			setCameraPermission(permission.state)
-			setPermissionChecked(true)
-
-			// Listener für Änderungen der Berechtigung
-			permission.addEventListener('change', () => {
-				setCameraPermission(permission.state)
-			})
+			await navigator.permissions.query({ name: 'camera' })
 		} catch (error) {
 			console.error('Fehler beim Prüfen der Kameraberechtigung:', error)
-			setPermissionChecked(true)
 		}
 	}
+
+	useEffect(() => {
+		checkCameraPermission()
+	}, [])
 
 	const toggleScanner = () => {
 		setIsScanning(prev => {
