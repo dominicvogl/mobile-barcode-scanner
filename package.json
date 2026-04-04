@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@yudiel/react-qr-scanner": "2.4.1",
-    "barcode-detector": "3.0.6",
+    "barcode-detector": "3.1.2",
     "daisyui": "^5.5.19",
     "next": "^16.2.2",
     "react": "^19.2.4",
